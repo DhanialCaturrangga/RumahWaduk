@@ -70,7 +70,7 @@ export default function Navbar() {
                         animate="open"
                         exit="closed"
                         variants={overlayVariants}
-                        className="fixed inset-0 z-[70] bg-[#3B3A36]/90 text-white flex flex-col"
+                        className="fixed inset-0 z-[70] bg-[#3B3A36]/50 text-white flex flex-col"
                         style={{ backdropFilter: "blur(20px)" }}
                     >
                         {/* Main Overlay Content */}
@@ -99,10 +99,6 @@ export default function Navbar() {
                                 animate={{ opacity: 1, transition: { delay: 0.4, duration: 1 } }}
                                 className="hidden md:flex absolute inset-0 w-full h-[80%] mt-20 items-center justify-center pointer-events-none z-0"
                             >
-                                <div className="w-[60%] h-full relative overflow-hidden rounded-sm mix-blend-lighten opacity-30 blur-[4px]">
-                                    {/* Using standard img tag to prevent next/image loading issues in dev */}
-                                    <img src="/assets/image/ARJ09250.jpg" alt="Rumah Waduk Menu Background" className="object-cover w-full h-full" />
-                                </div>
                             </motion.div>
 
                             {/* Contact & Hours Column (Right) */}

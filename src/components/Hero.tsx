@@ -99,7 +99,7 @@ export default function Hero() {
                         rumah
                     </span>
                     <span
-                        className="text-6xl md:text-[8rem] lg:text-[11rem] tracking-tight lowercase font-serif italic text-(--color-brand-primary) drop-shadow-2xl"
+                        className="text-6xl md:text-[8rem] lg:text-[11rem] tracking-tight lowercase font-serif italic text-white drop-shadow-2xl"
                         style={{ fontFamily: "'Playfair Display', serif" }}
                     >
                         waduk.
