@@ -3,13 +3,12 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLDivElement>(null);
-    const cardRef = useRef<HTMLDivElement>(null);
+    const scrollIndicatorRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         gsap.registerPlugin(ScrollTrigger);
@@ -17,24 +16,56 @@ export default function Hero() {
         // Initial Reveal Animation
         const tl = gsap.timeline();
         tl.fromTo(
-            cardRef.current,
-            { y: 50, opacity: 0, scale: 0.95 },
-            { y: 0, opacity: 1, scale: 1, duration: 1.2, ease: "power3.out" }
+            imageRef.current,
+            { scale: 1.05, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 2, ease: "power2.out" }
         ).fromTo(
             textRef.current?.children as unknown as HTMLElement[],
-            { y: 30, opacity: 0 },
-            { y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: "power3.out" },
-            "-=0.8"
+            { y: 50, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1.2, stagger: 0.2, ease: "power3.out" },
+            "-=1.5"
+        ).fromTo(
+            scrollIndicatorRef.current,
+            { opacity: 0, y: -20 },
+            { opacity: 1, y: 0, duration: 1.5, ease: "power2.out" },
+            "-=0.5"
         );
 
-        // Parallax on Scroll for the background blur
+        // Scroll Animations
+        // 1. Background Image Zoom (Red Bull style depth)
         gsap.to(imageRef.current, {
-            yPercent: 15,
+            scale: 1.15,
             ease: "none",
             scrollTrigger: {
                 trigger: containerRef.current,
                 start: "top top",
                 end: "bottom top",
+                scrub: true,
+            },
+        });
+
+        // 2. Text Parallax & Fade (moves faster than background)
+        gsap.to(textRef.current, {
+            y: -150,
+            opacity: 0,
+            ease: "none",
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top top",
+                end: "bottom top",
+                scrub: true,
+            },
+        });
+
+        // 3. Scroll Indicator Fade Out (disappears quickly upon scroll)
+        gsap.to(scrollIndicatorRef.current, {
+            opacity: 0,
+            y: -20,
+            ease: "none",
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top top",
+                end: "top -20%",
                 scrub: true,
             },
         });
@@ -45,75 +76,60 @@ export default function Hero() {
     }, []);
 
     return (
-        <section ref={containerRef} id="home" className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-(--color-brand-bg)">
+        <section ref={containerRef} id="home" className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-black z-0">
 
-            {/* Heavily Blurred Full Background */}
+            {/* Full Bleed Background Image */}
             <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                 <div
                     ref={imageRef}
-                    className="w-full h-[120%] -top-[10%] relative bg-cover bg-center"
+                    className="w-full h-full relative bg-cover bg-center"
                     style={{
-                        backgroundImage: "url('/assets/image/ARJ08969.jpg')",
-                        filter: 'blur(40px) brightness(0.9)',
-                        transform: 'scale(1.1)'
+                        backgroundImage: "url('/assets/image/ARJ09350.jpg')",
                     }}
                 >
-                    {/* Fallback pattern */}
-                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--color-brand-secondary)_1px,_transparent_1px)] bg-[size:24px_24px]"></div>
                 </div>
-                {/* Vignette/Gradient overlay for deeper contrast like florporto */}
-                <div className="absolute inset-0 bg-gradient-to-b from-(--color-brand-primary)/20 via-transparent to-(--color-brand-bg) z-10" />
+                {/* Gradient overlay to ensure text contrast (Editorial style uses dark vignette/gradient) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/60 z-10" />
             </div>
 
-            {/* Top Indicator (Like FLORPORTO local time) */}
-            <div className="absolute top-10 w-full text-center z-20 pointer-events-none">
-                <p className="text-xs tracking-[0.2em] text-(--color-brand-text)/60 uppercase font-medium">
-                    est. 2022
+            {/* Editorial Typography Center */}
+            <div ref={textRef} className="relative z-20 text-center flex flex-col items-center px-6">
+                <h1 className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 text-white leading-none">
+                    <span className="text-6xl md:text-[8rem] lg:text-[11rem] font-bold tracking-tighter drop-shadow-2xl">
+                        rumah
+                    </span>
+                    <span
+                        className="text-6xl md:text-[8rem] lg:text-[11rem] tracking-tight lowercase font-serif italic text-(--color-brand-primary) drop-shadow-2xl"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                        waduk.
+                    </span>
+                </h1>
+                <p className="mt-8 md:mt-12 text-white/90 text-xl md:text-3xl font-light tracking-wide max-w-3xl drop-shadow-lg">
+                    Kopi <span className="font-serif italic text-(--color-brand-primary)">kudapan</span> dan cerita di setiap sudut <span className="font-serif italic text-(--color-brand-primary)">kota.</span>
                 </p>
             </div>
 
-            {/* Center Card Container */}
-            <div className="relative z-30 w-full max-w-5xl px-6 lg:px-12 flex flex-col items-center flex-grow justify-center">
-                <div
-                    ref={cardRef}
-                    className="relative w-full aspect-[16/9] md:aspect-[2.5/1] rounded-[2rem] overflow-hidden shadow-2xl flex items-center justify-center"
-                >
-                    {/* Actual Sharp Image */}
-                    <div
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: "url('/assets/image/ARJ08969.jpg')" }}
-                    >
-                        <div className="absolute inset-0 bg-black/20" /> {/* Slight dark overlay to make text pop */}
-                    </div>
-
-                    {/* Overlay Text inside card */}
-                    <div ref={textRef} className="relative z-10 text-center flex flex-col items-center">
-                        <h1
-                            className="text-7xl md:text-9xl tracking-tight text-white mb-2"
-                            style={{
-                                fontFamily: "'Caveat', 'Playball', cursive", // Using a cursive fallback for "Flôr" script style
-                                textShadow: '0 4px 20px rgba(0,0,0,0.3)'
-                            }}
-                        >
-                            rumah waduk
-                        </h1>
-                    </div>
+            {/* Scroll Indicator (Red Bull Style) */}
+            <div ref={scrollIndicatorRef} className="absolute bottom-12 w-full flex flex-col items-center justify-center z-20 pointer-events-none gap-6">
+                <span className="text-[10px] sm:text-xs tracking-[0.25em] text-white/50 uppercase font-semibold">
+                    Scroll to explore
+                </span>
+                <div className="w-[1px] h-16 bg-white/20 relative overflow-hidden">
+                    <div className="w-full h-full bg-white absolute top-0 left-0 animate-[scroll-indicator_2s_ease-in-out_infinite]" />
                 </div>
             </div>
 
-            {/* Bottom Breadcrumbs/Nav indicators */}
-            <div className="absolute bottom-10 w-full z-20 flex justify-center space-x-6 text-sm tracking-widest text-(--color-brand-text)/70 lowercase pointer-events-none font-light">
-                <span>kopi</span>
-                <span className="opacity-50">•</span>
-                <span>kudapan</span>
-                <span className="opacity-50">•</span>
-                <span>cerita</span>
-            </div>
-
-            {/* Import Google Font for cursive script */}
+            {/* Import Google Fonts and Custom Animation */}
             <style dangerouslySetInnerHTML={{
                 __html: `
-                @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,600&display=swap');
+                
+                @keyframes scroll-indicator {
+                    0% { transform: translateY(-100%); }
+                    50% { transform: translateY(0%); }
+                    100% { transform: translateY(100%); }
+                }
              `}} />
         </section>
     );
