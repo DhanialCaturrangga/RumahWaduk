@@ -1,11 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > window.innerHeight * 0.8);
+        };
+        // Run once on mount to get initial position
+        handleScroll();
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     const toggleMenu = () => setIsOpen(!isOpen);
 
     // Overlay Animation Variants
@@ -26,12 +38,12 @@ export default function Navbar() {
     return (
         <>
             {/* Top Fixed Header matches florporto.com */}
-            <header className={`fixed top-0 left-0 w-full z-[80] px-6 md:px-12 py-8 flex justify-between items-center bg-transparent pointer-events-none transition-colors duration-500 ${isOpen ? 'text-white' : 'text-(--color-brand-text)'}`}>
+            <header className={`fixed top-0 left-0 w-full z-[80] px-6 md:px-12 py-8 flex justify-between items-center bg-transparent pointer-events-none transition-colors duration-500 ${isOpen || !isScrolled ? 'text-white' : 'text-(--color-brand-text)'}`}>
 
                 {/* Logo Section (Acts as Home Button) */}
                 <div className="pointer-events-auto">
                     <a href="#home" onClick={() => setIsOpen(false)} className="flex items-center space-x-2">
-                        <div className={`relative w-32 h-10 md:w-40 md:h-12 transition-all duration-500 ${isOpen ? 'brightness-0 invert' : ''}`}>
+                        <div className={`relative w-32 h-10 md:w-40 md:h-12 transition-all duration-500 ${isOpen || !isScrolled ? 'brightness-0 invert' : ''}`}>
                             <Image
                                 src="/assets/rumahwaduk_logo.png"
                                 alt="Rumah Waduk Logo"
