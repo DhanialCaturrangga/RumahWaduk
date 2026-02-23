@@ -1,160 +1,182 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { menuData, MenuItem } from "@/data/menu";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronRight } from "lucide-react";
+import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+const categoryHighlights = [
+    {
+        id: "makanan",
+        title: "makanan utama.",
+        subtitle: "cita rasa yang sesungguhnya",
+        description: "nikmati hidangan utama pilihan yang diracik dengan bumbu rahasia dapur rumah waduk. dari nasi goreng aroma khas hingga soto ubi yang menghangatkan, setiap suapan adalah cerita dari nusantara yang disajikan dengan penuh cinta.",
+        image: "/assets/image/ARJ09046.jpg",
+        align: "right"
+    },
+    {
+        id: "snack",
+        title: "camilan & ringan.",
+        subtitle: "kawan setia untuk segala suasana",
+        description: "teman sempurna untuk obrolan sore hari. kami menyajikan pisang peppe klasik makassar dengan sambal terasi yang menggugah selera, dan aneka camilan renyah yang siap melengkapi momen santai anda di tepi waduk.",
+        image: "/assets/image/ARJ08897.jpg",
+        align: "left"
+    },
+    {
+        id: "coffee",
+        title: "kopi pilihan.",
+        subtitle: "seduhan dari biji kopi nusantara",
+        description: "rasakan kebangkitan energi dari racikan kopi susu gula aren andalan kami, atau seruput secangkir kopi hitam murni yang diseduh manual. setiap tetes kopi rumah waduk menjanjikan keseimbangan rasa yang sempurna untuk menemani hari.",
+        image: "/assets/image/ARJ08943.jpg",
+        align: "right"
+    },
+    {
+        id: "non-coffee",
+        title: "segar tanpakopi.",
+        subtitle: "manis, dingin, dan menyegarkan",
+        description: "bagi anda yang mencari kesegaran lain, nikmati sensasi thai tea yang autentik, kelembutan milk tea klasik, hingga kesegaran cincau kuah gula aren. pelepas dahaga terbaik sambil memandangi tenangnya air waduk.",
+        image: "/assets/image/ARJ08860.jpg",
+        align: "left"
+    }
+];
+
 export default function MenuSection() {
-    const [activeTab, setActiveTab] = useState(menuData[0].category);
-    const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
     const sectionRef = useRef(null);
 
-    const activeItems = menuData.find(m => m.category === activeTab)?.items || [];
-
-    // GSAP scroll trigger for the whole section
     useEffect(() => {
         gsap.registerPlugin(ScrollTrigger);
+        const categories = gsap.utils.toArray(".category-block");
+
+        // Header animation
         gsap.fromTo(
-            ".menu-header",
-            { y: 30, opacity: 0 },
+            ".menu-header-creative",
+            { y: 50, opacity: 0 },
             {
-                y: 0, opacity: 1, duration: 0.8, ease: "power2.out",
+                y: 0, opacity: 1, duration: 1, ease: "power3.out",
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 80%"
+                    start: "top 75%",
                 }
             }
         );
+
+        // Individual category scroll animations with slight parallax
+        categories.forEach((cat: any, i) => {
+            const imageContainer = cat.querySelector(".cat-image-container");
+            const image = cat.querySelector(".cat-image");
+            const textContent = cat.querySelector(".cat-text-content");
+
+            // Pin the text while image scrolls past (Creative reveal)
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: cat,
+                    start: "top 80%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                }
+            });
+
+            tl.fromTo(imageContainer,
+                { scale: 0.9, opacity: 0, clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" },
+                { scale: 1, opacity: 1, clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)", duration: 1.2, ease: "power4.inOut" }
+            )
+                .fromTo(textContent,
+                    { y: 50, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" },
+                    "-=0.6" // overlap animation
+                );
+
+            // Softened parallax on the image itself
+            gsap.fromTo(image,
+                { yPercent: -10 },
+                {
+                    yPercent: 10,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: cat,
+                        start: "top bottom",
+                        end: "bottom top",
+                        scrub: 0.5 // Add a slight delay to scrubbing for smoother feel
+                    }
+                }
+            );
+        });
+
     }, []);
 
-    // Handle locking body scroll when sidebar is open
-    useEffect(() => {
-        if (selectedItem) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "auto";
-        }
-    }, [selectedItem]);
-
     return (
-        <section ref={sectionRef} id="menu" className="py-24 w-full max-w-6xl mx-auto px-6 relative">
-            <div className="menu-header mb-12 flex flex-col items-center">
-                <h2 className="text-4xl md:text-5xl font-semibold lowercase mb-8">menu kami.</h2>
+        <section ref={sectionRef} id="menu" className="py-24 md:py-40 w-full bg-(--color-brand-bg) relative overflow-hidden">
+            {/* Background Accent */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-(--color-brand-secondary)/5 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-(--color-brand-primary)/5 rounded-full blur-[100px] pointer-events-none" />
 
-                {/* Category Tabs */}
-                <div className="flex flex-wrap justify-center gap-4">
-                    {menuData.map((cat) => (
-                        <button
-                            key={cat.category}
-                            onClick={() => setActiveTab(cat.category)}
-                            className={`px-6 py-2 rounded-full text-sm font-medium lowercase transition-all duration-300 ${activeTab === cat.category
-                                ? "bg-(--color-brand-text) text-(--color-brand-bg) shadow-md"
-                                : "glass-panel hover:bg-black/5 text-(--color-brand-text)/70 border-none shadow-sm"
-                                }`}
-                        >
-                            {cat.category}
-                        </button>
+            <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
+                <div className="menu-header-creative text-center md:text-left mb-20 md:mb-32 flex flex-col md:flex-row md:items-end justify-between border-b border-black/10 pb-12 gap-8">
+                    <div>
+                        <p className="text-sm tracking-[0.3em] opacity-40 uppercase mb-6 text-(--color-brand-text) font-medium">Buku Menu</p>
+                        <h2 className="text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight lowercase text-(--color-brand-text) leading-[0.9]">
+                            sajian <br />
+                            <span className="text-(--color-brand-secondary) font-serif italic relative inline-block">
+                                rasa.
+                                <svg className="absolute -bottom-4 -right-12 w-24 h-6 opacity-30 text-(--color-brand-text)" viewBox="0 0 100 20" preserveAspectRatio="none">
+                                    <path d="M0,10 Q50,20 100,5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                            </span>
+                        </h2>
+                    </div>
+                    <div className="max-w-md text-right hidden md:block">
+                        <p className="text-(--color-brand-text)/60 font-light lowercase leading-relaxed text-lg pb-4">
+                            empat pilar rasa yang kami hadirkan khusus untuk menemani setiap cerita dan tawa anda di rumah waduk.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="space-y-32 md:space-y-48">
+                    {categoryHighlights.map((cat, index) => (
+                        <div key={cat.id} className={`category-block flex flex-col ${cat.align === 'right' ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12 md:gap-24`}>
+
+                            {/* Image Side */}
+                            <div className="w-full md:w-1/2 h-[500px] md:h-[700px] relative cat-image-container overflow-hidden rounded-sm group">
+                                <div className="absolute inset-0 bg-black/10 z-10 group-hover:bg-black/0 transition-colors duration-700" />
+                                <div
+                                    className="cat-image absolute inset-[-20%] w-[140%] h-[140%] bg-cover bg-center"
+                                    style={{ backgroundImage: `url(${cat.image})` }}
+                                />
+                                {/* Number indicator (01, 02, etc) */}
+                                <div className="absolute top-8 left-8 z-20 overflow-hidden mix-blend-difference">
+                                    <span className="text-5xl md:text-7xl font-serif italic text-white opacity-80 inline-block transform translate-y-0 group-hover:-translate-y-4 transition-transform duration-500">
+                                        0{index + 1}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Text Side */}
+                            <div className="w-full md:w-1/2 cat-text-content flex flex-col justify-center">
+                                <div className="relative">
+                                    <h3 className="text-4xl md:text-6xl lg:text-7xl font-light lowercase text-(--color-brand-text) mb-6 leading-tight">
+                                        {cat.title}
+                                    </h3>
+                                    <div className="w-12 h-[2px] bg-(--color-brand-secondary) mb-8" />
+                                    <p className="text-xl md:text-2xl font-serif italic text-(--color-brand-text)/80 mb-6 lowercase">
+                                        {cat.subtitle}
+                                    </p>
+                                    <p className="text-base md:text-lg font-light text-(--color-brand-text)/60 leading-relaxed lowercase">
+                                        {cat.description}
+                                    </p>
+
+                                    <div className="mt-12 overflow-hidden">
+                                        <button className="relative group inline-flex items-center gap-4 text-sm tracking-widest uppercase font-medium text-(--color-brand-text)">
+                                            <span className="relative z-10 transition-colors duration-300 group-hover:text-(--color-brand-secondary)">lihat menu {cat.id}</span>
+                                            <div className="w-8 h-[1px] bg-currentColor relative z-10 transition-all duration-300 group-hover:w-12 group-hover:bg-(--color-brand-secondary)" />
+                                            {/* Minimalist interactive underline */}
+                                            <div className="absolute bottom-[-4px] left-0 w-full h-[1px] bg-(--color-brand-text)/20 scale-x-100 origin-right transition-transform duration-500 opacity-0 group-hover:opacity-100" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     ))}
                 </div>
             </div>
-
-            {/* Menu Grid - 2-row horizontal scroll */}
-            <div className="w-full overflow-x-auto pb-12 pt-4 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 relative">
-                <motion.div
-                    layout
-                    className="grid grid-rows-2 grid-flow-col auto-cols-[85vw] md:auto-cols-[400px] gap-6 md:gap-8 w-fit"
-                >
-                    <AnimatePresence mode="popLayout">
-                        {activeItems.map((item) => (
-                            <motion.div
-                                key={item.id}
-                                layout
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ duration: 0.4 }}
-                                onClick={() => setSelectedItem(item)}
-                                className="snap-center glass-panel p-8 cursor-pointer group hover:bg-(--color-brand-secondary)/5 transition-colors border border-black/5 flex flex-col justify-between h-full"
-                            >
-                                <div>
-                                    <div className="flex justify-between items-start mb-4 gap-4">
-                                        <h3 className="text-xl md:text-2xl font-light lowercase group-hover:text-(--color-brand-secondary) transition-colors">{item.name}</h3>
-                                        <span className="text-(--color-brand-primary) font-medium tracking-wide text-sm whitespace-nowrap">{item.price}</span>
-                                    </div>
-                                    <p className="text-(--color-brand-text)/50 text-sm font-light lowercase line-clamp-3 leading-relaxed">
-                                        {item.description}
-                                    </p>
-                                </div>
-                                <div className="mt-8 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <div className="w-8 h-8 rounded-full border border-(--color-brand-primary)/30 flex items-center justify-center text-(--color-brand-primary)">
-                                        <ChevronRight className="w-4 h-4" />
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </motion.div>
-            </div>
-
-            {/* Sidebar Overlay */}
-            <AnimatePresence>
-                {selectedItem && (
-                    <>
-                        <motion.div
-                            key="overlay"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setSelectedItem(null)}
-                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60]"
-                        />
-                        <motion.div
-                            key="sidebar"
-                            initial={{ x: "100%" }}
-                            animate={{ x: "0%" }}
-                            exit={{ x: "100%" }}
-                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-full w-full max-w-md bg-(--color-brand-bg)/95 backdrop-blur-2xl z-[70] shadow-2xl border-l border-white/20 p-8 flex flex-col overflow-y-auto"
-                        >
-                            <button
-                                onClick={() => setSelectedItem(null)}
-                                className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors self-end mb-8"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-
-                            <div className="flex-1">
-                                <div className="w-full aspect-[4/3] rounded-3xl bg-(--color-brand-primary)/10 flex items-center justify-center overflow-hidden mb-8 shadow-inner">
-                                    {/* Image placeholder - will be replaced by actual high-res assets */}
-                                    <div
-                                        className="w-full h-full bg-cover bg-center transition-transform hover:scale-105 duration-700"
-                                        style={{ backgroundImage: `url(${selectedItem.image})` }}
-                                    >
-                                        <div className="w-full h-full bg-black/5 flex items-center justify-center backdrop-blur-[2px]">
-                                            <span className="text-white/80 lowercase text-sm">asset: {selectedItem.image.split('/').pop()}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-end">
-                                        <h2 className="text-3xl font-semibold lowercase leading-none">{selectedItem.name}</h2>
-                                        <span className="text-xl text-(--color-brand-primary) font-semibold">{selectedItem.price}</span>
-                                    </div>
-                                    <div className="w-full h-[1px] bg-black/10 my-6" />
-                                    <p className="text-(--color-brand-text)/80 leading-relaxed font-light lowercase text-lg">
-                                        {selectedItem.description}
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-
         </section>
     );
 }
