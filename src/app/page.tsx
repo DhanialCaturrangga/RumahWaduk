@@ -68,6 +68,24 @@ export default function Home() {
             <a href="#home" className="text-xs uppercase tracking-[0.2em] font-medium hover:opacity-60 transition-opacity">back to top</a>
             <p className="text-xs opacity-50 uppercase tracking-[0.2em]">est. 2022</p>
           </div>
+
+          {/* Animated Creator Watermark */}
+          <div className="w-full flex justify-center mt-16 pb-4 overflow-hidden group">
+            <a
+              href="https://github.com/DhanialCaturrangga"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative flex items-center space-x-2 text-[10px] sm:text-xs tracking-[0.3em] uppercase opacity-40 hover:opacity-100 transition-all duration-500 transform hover:-translate-y-1"
+            >
+              <span className="font-light">develop by</span>
+              <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-300 to-white bg-[length:200%_auto] animate-gradient-x group-hover:from-(--color-brand-primary) group-hover:via-(--color-brand-secondary) group-hover:to-(--color-brand-primary)">
+                DanielCaturrangga
+              </span>
+
+              {/* Animated underline */}
+              <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent transition-all duration-500 group-hover:w-full opacity-0 group-hover:opacity-100"></span>
+            </a>
+          </div>
         </footer>
       </div>
     </main>
